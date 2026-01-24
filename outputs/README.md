@@ -7,7 +7,7 @@ Estimar el movimiento de un punto en 3D que realiza un movimiento circular, util
 
 ## Visualización de los Datos
 
-![Data Visualization](../resources/outputs/data_visualization.png)
+<img width="5258" height="1775" alt="data_visualization" src="https://github.com/user-attachments/assets/1748bba6-a968-42b2-890e-4976c0d76c35" />
 
 ---
 
