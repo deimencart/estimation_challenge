@@ -84,6 +84,10 @@ Four experiments were conducted to estimate the 3D motion of a point moving in a
 | **Exp 3** | Camera | A (close) | 12.0 cm | **30.3 cm** | **102.9 cm**  | 65.2 cm | 347.7 cm | 2.0 cm |
 | **Exp 4** | Camera | B (far) | 173.5 cm | **498.0 cm**  | **122.9 cm**  | 89.1 cm | 527.7 cm | 2.0 cm |
 
+D:\Dev_Space\estimation_challenge\results_1\exp1_3d_sensor_guess_a.png
+
+
+
 
 ---
 
