@@ -146,25 +146,23 @@ def experiment_a(measurments, ground_truth):
     
     errors = np.array(errors)
     
-    # ------------------------------------------------------------------------
-    # PASO 7: Mostrar estadísticas
-    # ------------------------------------------------------------------------
-    
+ 
     print("="*70)
-    print("RESULTADOS - EXPERIMENTO 1")
+    print("Results - EXPERIMENT 3")
     print("="*70)
-    print(f"Error del initial guess: {error_init:.4f} m  ({error_init*100:.1f} cm)")
-    print(f"Error después 1ra med:   {errors[0]:.4f} m  ({errors[0]*100:.1f} cm)")
-    print(f"Error promedio:          {errors.mean():.4f} m  ({errors.mean()*100:.1f} cm)")
-    print(f"Desviación estándar:     {errors.std():.4f} m")
-    print(f"Error máximo:            {errors.max():.4f} m")
-    print(f"Error mínimo:            {errors.min():.4f} m")
+    print(f"Error initial guess: {error_init:.4f} m  ({error_init*100:.1f} cm)")
+    print(f"Error After first measurement:   {errors[0]:.4f} m  ({errors[0]*100:.1f} cm)")
+    print(f"Mean Error:          {errors.mean():.4f} m  ({errors.mean()*100:.1f} cm)")
+    print(f"Standard Deviation:     {errors.std():.4f} m")
+    print(f"Error max:            {errors.max():.4f} m")
+    print(f"Error min:            {errors.min():.4f} m")
     print(f"Error final:             {errors[-1]:.4f} m  ({errors[-1]*100:.1f} cm)")
     print()
     
     return estimated_states, errors
 
 def experiment_b(measurments, ground_truth): 
+
     """
     Experiment 1: 3D Sensor + Guess A
 
@@ -196,7 +194,7 @@ def experiment_b(measurments, ground_truth):
     #This is the direct MEasurment of the postion 
 
     R = np.diag([0.02, 0.02, 0.02])  # Measurement noise covariance given by the challenge
-    print(f"  Ruido del sensor: σ = {np.sqrt(np.diag(R)[0]):.4f} m (≈14 cm)")
+    print(f"  Sensor noise: σ = {np.sqrt(np.diag(R)[0]):.4f} m (≈14 cm)")
     print()
 
     # Creating Kalman Filter instance
@@ -236,19 +234,211 @@ def experiment_b(measurments, ground_truth):
     
     errors = np.array(errors)
     
-    # ------------------------------------------------------------------------
-    # PASO 7: Mostrar estadísticas
-    # ------------------------------------------------------------------------
+   
+    print("="*70)
+    print("Results - EXPERIMENT 2")
+    print("="*70)
+    print(f"Error initial guess: {error_init:.4f} m  ({error_init*100:.1f} cm)")
+    print(f"Error After first measurement:   {errors[0]:.4f} m  ({errors[0]*100:.1f} cm)")
+    print(f"Mean Error:          {errors.mean():.4f} m  ({errors.mean()*100:.1f} cm)")
+    print(f"Standard Deviation:     {errors.std():.4f} m")
+    print(f"Error max:            {errors.max():.4f} m")
+    print(f"Error min:            {errors.min():.4f} m")
+    print(f"Error final:             {errors[-1]:.4f} m  ({errors[-1]*100:.1f} cm)")
+    print()
+    
+    return estimated_states, errors
+
+def experiment_c(measurements, ground_truth): 
+    """
+    Experimento 3: Extended Kalman Filter con Cámara 2D + Guess A
+    
+    Parameters:
+    -----------
+    measurements : ndarray (700, 2)
+        Camera measurements [u, v] in pixels
+    ground_truth : ndarray (700, 3)
+        Real position [x, y, z] in meters
+
+    Returns:
+    --------
+    estimated_states : ndarray (700, 6)
+        Estimated states [x, y, z, vx, vy, vz]
+    errors : ndarray (700,)
+        Position errors at each timestep
+    """
+    
+    # ========================================================================
+    # CONFIGURACIÓN
+    # ========================================================================
+    
+    X0 = np.concatenate([GUESS_A, np.zeros(3)])
+    #P0 = np.eye(6) * 0.0001
+    P0 = np.diag([0.01, 0.01, 10.0, 0.1, 0.1, 0.1])
+    
+    F, Q = create_motion_model(DT, q_std=0.01)
+    R = np.diag([5.0, 5.0])
+    
+    # Funciones no lineales
+    def h_function(x):
+        return camera_projection(x, FOCAL_LENGTH, CX, CY)   
+    
+    def jacobian_function(x):
+        return camera_jacobian(x, FOCAL_LENGTH)
+    
+    # Crear EKF
+    ekf = ExtendedKalmanFilter(X0, P0, F, Q, R, h_function, jacobian_function)
     
     print("="*70)
-    print("RESULTADOS - EXPERIMENTO 2")
+    print("EXPERIMENT 3: Cámara 2D + Guess A")
     print("="*70)
-    print(f"Error del initial guess: {error_init:.4f} m  ({error_init*100:.1f} cm)")
-    print(f"Error después 1ra med:   {errors[0]:.4f} m  ({errors[0]*100:.1f} cm)")
-    print(f"Error promedio:          {errors.mean():.4f} m  ({errors.mean()*100:.1f} cm)")
-    print(f"Desviación estándar:     {errors.std():.4f} m")
-    print(f"Error máximo:            {errors.max():.4f} m")
-    print(f"Error mínimo:            {errors.min():.4f} m")
+    print()
+    print("Extended Kalman Filter created")
+    print()
+    
+    # Error inicial
+    error_init = np.linalg.norm(GUESS_A - ground_truth[0])
+    print(f"Error initial guess: {error_init:.4f} m ({error_init*100:.1f} cm)")
+    print()
+    
+    print("Executing Extended Kalman Filter")
+    n_measurements = len(measurements)
+    
+    for i in range(n_measurements):  # ← Loop empieza aquí
+        z = measurements[i]
+        ekf.predict()
+        ekf.update(z)
+        
+        
+        if (i + 1) % 100 == 0 or i == n_measurements - 1:
+            print(f"  Time Step {i + 1}/{n_measurements} completed.")
+    
+    
+    print("Filter completed")
+    print()
+    
+    estimated_states = ekf.get_state_history()
+    
+    errors = []
+    for i in range(len(estimated_states)):
+        estimated_pos = estimated_states[i, 0:3]
+        true_pos = ground_truth[i]
+        error = np.linalg.norm(estimated_pos - true_pos)
+        errors.append(error)
+    
+    errors = np.array(errors)
+    
+
+    
+    print("="*70)
+    print("Results - EXPERIMENT 3")
+    print("="*70)
+    print(f"Error initial guess: {error_init:.4f} m  ({error_init*100:.1f} cm)")
+    print(f"Error After first measurement:   {errors[0]:.4f} m  ({errors[0]*100:.1f} cm)")
+    print(f"Mean Error:          {errors.mean():.4f} m  ({errors.mean()*100:.1f} cm)")
+    print(f"Standard Deviation:     {errors.std():.4f} m")
+    print(f"Error max:            {errors.max():.4f} m")
+    print(f"Error min:            {errors.min():.4f} m")
+    print(f"Error final:             {errors[-1]:.4f} m  ({errors[-1]*100:.1f} cm)")
+    print()
+    
+    return estimated_states, errors
+
+def experiment_d(measurements, ground_truth): 
+    """
+    Experimento d: Extended Kalman Filter con Cámara 2D + Guess B
+    
+    Parameters:
+    -----------
+    measurements : ndarray (700, 2)
+        Camera measurements [u, v] in pixels
+    ground_truth : ndarray (700, 3)
+        Real position [x, y, z] in meters
+
+    Returns:
+    --------
+    estimated_states : ndarray (700, 6)
+        Estimated states [x, y, z, vx, vy, vz]
+    errors : ndarray (700,)
+        Position errors
+    """
+    
+    # ========================================================================
+    # CONFIGURACIÓN
+    # ========================================================================
+    
+    X0 = np.concatenate([GUESS_B, np.zeros(3)])
+    #P0 = np.eye(6) * 0.0001
+    P0 = np.diag([0.01, 0.01, 10.0, 0.1, 0.1, 0.1])
+    
+    F, Q = create_motion_model(DT, q_std=0.01)
+    R = np.diag([5.0, 5.0])
+    
+    # Funciones no lineales
+    def h_function(x):
+        return camera_projection(x, FOCAL_LENGTH, CX, CY)   
+    
+    def jacobian_function(x):
+        return camera_jacobian(x, FOCAL_LENGTH)
+    
+    # Crear EKF
+    ekf = ExtendedKalmanFilter(X0, P0, F, Q, R, h_function, jacobian_function)
+    
+    print("="*70)
+    print("EXPERIMENT 4: Cámara 2D + Guess B")
+    print("="*70)
+    print()
+    print("Extended Kalman Filter created")
+    print()
+    
+    # Error inicial
+    error_init = np.linalg.norm(GUESS_B - ground_truth[0])
+    print(f"Error initial guess: {error_init:.4f} m ({error_init*100:.1f} cm)")
+    print()
+    
+    # ========================================================================
+    # EJECUTAR FILTRO
+    # ========================================================================
+    
+    print("Ejecutando Extended Kalman Filter...")
+    n_measurements = len(measurements)
+    
+    for i in range(n_measurements):  # ← Loop empieza aquí
+        z = measurements[i]
+        ekf.predict()
+        ekf.update(z)
+        
+        # Mostrar progreso
+        if (i + 1) % 100 == 0 or i == n_measurements - 1:
+            print(f"  Time Step {i + 1}/{n_measurements} completed.")
+    # ← Loop termina aquí
+    
+    print("Filter completed")
+    print()
+    
+
+    
+    estimated_states = ekf.get_state_history()
+    
+    errors = []
+    for i in range(len(estimated_states)):
+        estimated_pos = estimated_states[i, 0:3]
+        true_pos = ground_truth[i]
+        error = np.linalg.norm(estimated_pos - true_pos)
+        errors.append(error)
+    
+    errors = np.array(errors)
+    
+    
+    print("="*70)
+    print("Results - EXPERIMENT 4")
+    print("="*70)
+    print(f"Error initial guess: {error_init:.4f} m  ({error_init*100:.1f} cm)")
+    print(f"Error after first measurement:   {errors[0]:.4f} m  ({errors[0]*100:.1f} cm)")
+    print(f"Mean Error:          {errors.mean():.4f} m  ({errors.mean()*100:.1f} cm)")
+    print(f"Standard Deviation:     {errors.std():.4f} m")
+    print(f"Error max:            {errors.max():.4f} m")
+    print(f"Error min:            {errors.min():.4f} m")
     print(f"Error final:             {errors[-1]:.4f} m  ({errors[-1]*100:.1f} cm)")
     print()
     
@@ -414,13 +604,37 @@ def main ():
 
     save_results_and_plot(
     results_dir_name="results_2",
-    experiment_name="exp1_3d_sensor_guess_b",
+    experiment_name="exp2_3d_sensor_guess_b",
     states_exp=states_exp2,
     errors_exp=errors_exp2,
     ground_truth=ground_truth,
     initial_guess=GUESS_B,
-    sensor_label="Sensor 3D"
-)
+    sensor_label="Sensor 3D")
+
+    states_exp3, errors_exp3 = experiment_c(camera_2d, ground_truth)
+    
+    save_results_and_plot(
+        results_dir_name="results_3",
+        experiment_name="exp3_camera_guess_a",
+        states_exp=states_exp3,
+        errors_exp=errors_exp3,
+        ground_truth=ground_truth,
+        initial_guess=GUESS_A,
+        sensor_label="Camera 2D"
+    )
+
+    states_exp4, errors_exp4 = experiment_d(camera_2d, ground_truth)
+    
+    save_results_and_plot(
+        results_dir_name="results_4",
+        experiment_name="exp4_camera_guess_b",
+        states_exp=states_exp4,
+        errors_exp=errors_exp4,
+        ground_truth=ground_truth,
+        initial_guess=GUESS_B,
+        sensor_label="Camera 2D"
+    )
+
    
 
 
