@@ -46,7 +46,7 @@ Six experiments were conducted to estimate the 3D motion of a point moving in a 
 
 ---
 
-## 🔬 Experimental Setup
+## Experimental Setup
 
 ### **Sensors**
 
@@ -110,7 +110,7 @@ Six experiments were conducted to estimate the 3D motion of a point moving in a 
     - 3D sensor: Experiments A and B goes more into th esolution, are almost the same
     - Camera : The guess B affects into the beginning, but in the end, goes into the solution 
    
-3. camera experiments exhibited significantly higher mean errors, exceeding one meter in both initial guess scenarios. Although the filter eventually converged to small final errors, large transient errors dominated the trajectory. This behavior reflects the inherent geometric limitations of monocular vision while lateral position (X, Y) is well constrained through image measurements, depth (Z) remains weakly observable.
+3. Camera experiments exhibited significantly higher mean errors, exceeding one meter in both initial guess scenarios. Although the filter eventually converged to small final errors, large transient errors dominated the trajectory. This behavior reflects the inherent geometric limitations of monocular vision while lateral position (X, Y) is well constrained through image measurements, depth (Z) remains weakly observable.
    - 3D sensor: stable, however a deeper study on R and Q may be necessary. 
    - weak depth estimation, maybe an stereo system may work better, a fusion in between sensors may work better. 
 <img width="1668" height="734" alt="results_all_circles" src="https://github.com/user-attachments/assets/a7200956-81de-4cf8-a867-ac63cefa9e33" />
