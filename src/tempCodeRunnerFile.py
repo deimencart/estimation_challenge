@@ -77,110 +77,6 @@ def load_data():
     return ground_truth, sensor_3d, camera_2d
 
 
-def fit_circle_2d(xy: np.ndarray):
-    """
-    Fit circle to 2D points using linear least squares (Kåsa-style).
-    Returns center (cx, cy), radius r, and residual RMSE in meters.
-    """
-    x = xy[:, 0]
-    y = xy[:, 1]
-
-    # Solve: x^2 + y^2 = a*x + b*y + c
-    A = np.column_stack([x, y, np.ones_like(x)])
-    b = x**2 + y**2
-
-    coeff, *_ = np.linalg.lstsq(A, b, rcond=None)
-    a, b_, c = coeff
-
-    cx = 0.5 * a
-    cy = 0.5 * b_
-    r = np.sqrt(max(cx**2 + cy**2 + c, 0.0))
-
-    d = np.sqrt((x - cx)**2 + (y - cy)**2)
-    rmse = np.sqrt(np.mean((d - r)**2))
-
-    return np.array([cx, cy]), r, rmse
-
-def fit_circle_3d(P: np.ndarray):
-    """
-    Returns:
-      center_3d (3,), radius, plane_normal (3,), rmse (m), u (3,), v (3,)
-    """
-    P = np.asarray(P)
-    assert P.ndim == 2 and P.shape[1] == 3
-
-    c = P.mean(axis=0)
-    X = P - c
-
-    _, _, Vt = np.linalg.svd(X, full_matrices=False)
-
-    normal = Vt[-1, :]
-    normal /= np.linalg.norm(normal)
-
-    u = Vt[0, :]
-    v = Vt[1, :]
-    u /= np.linalg.norm(u)
-    v /= np.linalg.norm(v)
-
-    xy = np.column_stack([X @ u, X @ v])
-    center_2d, r, rmse = fit_circle_2d(xy)
-
-    center_3d = c + center_2d[0] * u + center_2d[1] * v
-
-    return center_3d, r, normal, rmse, u, v
-
-def circle_points_3d(center, r, u, v, n=200):
-    theta = np.linspace(0, 2*np.pi, n)
-    pts = center[None, :] + r * (np.cos(theta)[:, None] * u[None, :] + np.sin(theta)[:, None] * v[None, :])
-    return pts  # (n,3)
-
-def plot_all_estimated_circles(ground_truth, circle_fits, save_path=None):
-    """
-    circle_fits: list of dicts like:
-      {"name": str, "center": (3,), "r": float, "u": (3,), "v": (3,)}
-    """
-    fig = plt.figure(figsize=(12, 5))
-
-    # -------- 3D plot --------
-    ax = fig.add_subplot(121, projection="3d")
-    ax.plot(ground_truth[:,0], ground_truth[:,1], ground_truth[:,2], label="Ground Truth", linewidth=2)
-
-    for cf in circle_fits:
-        pts = circle_points_3d(cf["center"], cf["r"], cf["u"], cf["v"], n=200)
-        ax.plot(pts[:,0], pts[:,1], pts[:,2], linewidth=2, label=cf["name"])
-
-    ax.set_title("Estimated Circles (3D)")
-    ax.set_xlabel("X (m)")
-    ax.set_ylabel("Y (m)")
-    ax.set_zlabel("Z (m)")
-    ax.legend(loc="best")
-    ax.grid(True)
-
-    # -------- XY top view --------
-    ax2 = fig.add_subplot(122)
-    ax2.plot(ground_truth[:,0], ground_truth[:,1], label="Ground Truth", linewidth=2)
-
-    for cf in circle_fits:
-        pts = circle_points_3d(cf["center"], cf["r"], cf["u"], cf["v"], n=200)
-        ax2.plot(pts[:,0], pts[:,1], linewidth=2, label=cf["name"])
-
-    ax2.set_title("Estimated Circles (XY Top View)")
-    ax2.set_xlabel("X (m)")
-    ax2.set_ylabel("Y (m)")
-    ax2.axis("equal")
-    ax2.grid(True)
-    ax2.legend(loc="best")
-
-    plt.tight_layout()
-
-    if save_path is not None:
-        plt.savefig(save_path, dpi=150, bbox_inches="tight")
-
-    plt.show()
-
-
-
-
 def experiment_a_consPos(measurments, ground_truth):
     """
     Experiment 1: 3D Sensor + Guess A with Constant Position Model
@@ -1032,26 +928,7 @@ def main ():
         sensor_label="Camera 2D"
     )
 
-    circle = []
-    c, r, n, rmse, u, v = fit_circle_3d(states_exp1[:, 0:3])
-    circle.append({"name": "Exp1 3D CV A", "center": c, "r": r, "u": u, "v": v})
-    c, r, n, rmse, u, v = fit_circle_3d(states_exp_1b[:, 0:3])  # already Nx3
-    circle.append({"name": "Exp1b 3D CP A", "center": c, "r": r, "u": u, "v": v})
-    c, r, n, rmse, u, v = fit_circle_3d(states_exp2[:, 0:3])  # already Nx3
-    circle.append({"name": "Exp2 3D CV B", "center": c, "r": r, "u": u, "v": v})
-    c, r, n, rmse, u, v = fit_circle_3d(states_exp2b[:, 0:3])  # already Nx3
-    circle.append({"name": "Exp2b 3D CP B", "center": c, "r": r, "u": u, "v": v})
-    c, r, n, rmse, u, v = fit_circle_3d(states_exp3[:, 0:3])  # already Nx3
-    circle.append({"name": "Exp3 2D CV A", "center": c, "r": r, "u": u, "v": v})
-    c, r, n, rmse, u, v = fit_circle_3d(states_exp4[:, 0:3])  # already Nx3
-    circle.append({"name": "Exp4 2D CV B", "center": c, "r": r, "u": u, "v": v})
-    plot_all_estimated_circles(
-    ground_truth,
-    circle,
-    save_path="D:/Dev_Space/estimation_challenge/results_all_circles.png"
-)
-    
-
+   
 
 
 if __name__ == "__main__":

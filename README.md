@@ -77,13 +77,27 @@ Four experiments were conducted to estimate the 3D motion of a point moving in a
 
 ### **Comparison Table**
 
-| Experiment | Sensor | Guess | Error Initial Guess | Error After 1st Meas. | Mean Error | Std Dev | Max Error | Final Error |
-|------------|--------|-------|---------------------|----------------------|------------|---------|-----------|-------------|
-| **Exp 1** | 3D | A (close) | 12.0 cm | **18.9 cm** | **21.0 cm** | 9.2 cm | 63.6 cm | 19.2 cm |
-| **Exp 2** | 3D | B (far) | 173.5 cm | **19.0 cm** | **21.0 cm** | 9.2 cm | 63.6 cm | 19.2 cm |
-| **Exp 3** | Camera | A (close) | 12.0 cm | **30.3 cm** | **102.9 cm**  | 65.2 cm | 347.7 cm | 2.0 cm |
-| **Exp 4** | Camera | B (far) | 173.5 cm | **498.0 cm**  | **122.9 cm**  | 89.1 cm | 527.7 cm | 2.0 cm |
+| Experiment | Sensor | Guess | Error Initial Guess | Error After 1st Meas. | Mean Error | Std Dev | Max Error | Final Error| Model |
+|------------|--------|-------|---------------------|----------------------|------------|---------|-----------|-------------|-------|
+| **Exp 1** | 3D | A (close) | 12.0 cm | **18.9 cm** | **21.0 cm** | 9.2 cm | 63.6 cm | 19.2 cm |Velocity Const|
+| **Exp 1b** | 3D | A (close) | 12.0 cm | **18.8 cm** | **16.9 cm** | 6.82 cm | 39.7 cm | 2.5 cm |Cons Position|
+| **Exp 2** | 3D | B (far) | 173.5 cm | **19.0 cm** | **21.0 cm** | 9.2 cm | 63.6 cm | 19.2 cm |Velocity Const|
+| **Exp 2b** | 3D | B (far) | 173.5 cm | **19.2 cm** | **16.9.0 cm** | 6.82 cm | 39.7 cm | 2.5 cm |Cons Position|
+| **Exp 3** | Camera | A (close) | 12.0 cm | **30.3 cm** | **102.9 cm**  | 65.2 cm | 347.7 cm | 2.0 cm |Velocity Const|
+| **Exp 4** | Camera | B (far) | 173.5 cm | **498.0 cm**  | **122.9 cm**  | 89.1 cm | 527.7 cm | 2.0 cm |Velocity Const|
 
+
+## conlcusions 
+1. For the 3d sensor experiments. the constant position model consstently outperfromed the constant velocity model. The linear model, assumes a linear motion wich is not matching the circular trajectory, this introduces systematic prediction errors. The constat position model, allow the measurments to domcunate the estimation process. 
+   
+**“How does the initial guess affect the estimation w.r.t. each sensor?**  
+2. The experiments also showed that the initial guess has a limited long-term impact when using the 3D sensor. Despite large differences between the initial conditions (12 cm vs 173 cm), both configurations rapidly converged after the first measurement and reached nearly identical error statistics. This behavior indicates strong observability and reliable metric information provided by the 3D sensor.
+    - 3D sensor: Experiments A and B goes more into th esolution, are almost the same
+    - Camera : The guess B affects into the beginning, but in the end, goes into the solution 
+   
+3. camera experiments exhibited significantly higher mean errors, exceeding one meter in both initial guess scenarios. Although the filter eventually converged to small final errors, large transient errors dominated the trajectory. This behavior reflects the inherent geometric limitations of monocular vision while lateral position (X, Y) is well constrained through image measurements, depth (Z) remains weakly observable.
+   - 3D sensor: stable, however a deeper study on R and Q may be necessary. 
+   - weak depth estimation, maybe an stereo system may work better, a fusion in between sensors may work better. 
 
 ---
 

@@ -38,13 +38,37 @@ def create_motion_model(dt, q_std = 0.5):
                   [0, 0, 0, 0, 0, 1]])
     
     q = q_std ** 2
-    Q = q * np.array([[dt**4/4, 0, 0, dt**3/2, 0, 0],
+    """ Q = q * np.array([[dt**4/4, 0, 0, dt**3/2, 0, 0],
                       [0, dt**4/4, 0, 0, dt**3/2, 0],
                       [0, 0, dt**4/4, 0, 0, dt**3/2],
                       [dt**3/2, 0, 0, dt**2, 0, 0],
                       [0, dt**3/2, 0, 0, dt**2, 0],
-                      [0, 0, dt**3/2, 0, 0, dt**2]])
+                      [0, 0, dt**3/2, 0, 0, dt**2]])"""
+
+    G = np.array([[dt**2/2, 0, 0],
+                  [0, dt**2/2, 0],
+                  [0, 0, dt**2/2],
+                  [dt, 0, 0],
+                  [0, dt, 0],
+                  [0, 0, dt]])
+    Q = q * (G @ G.T)
     
+    return F, Q
+
+def constant_position_model(dt, q_std = 0.063):
+    """
+    Creates state transition matrix F and process noise Q for constant position model.
+    
+    Parameters:
+    -----------
+    dt : float
+        Time step between measurements
+        """
+    F = np.eye(3)
+    q = q_std ** 2
+    Q = q * np.array([[1, 0, 0],
+                      [0, 1, 0],
+                      [0, 0, 1]])
     return F, Q
 
 
