@@ -23,6 +23,8 @@ your task is to:
 
 Recommendation: use the classical Kalman Filter algorithm to solve this task. For the camera part, you will need to linearize, thus using the "Extended Kalman Filter" approach.
 
+
+###Visualization of the data
 <img width="5258" height="1775" alt="data_visualization" src="https://github.com/user-attachments/assets/769d5441-515c-44aa-b318-457d0793c8ae" />
 
 
