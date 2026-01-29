@@ -86,6 +86,14 @@ Four experiments were conducted to estimate the 3D motion of a point moving in a
 | **Exp 3** | Camera | A (close) | 12.0 cm | **30.3 cm** | **102.9 cm**  | 65.2 cm | 347.7 cm | 2.0 cm |Velocity Const|
 | **Exp 4** | Camera | B (far) | 173.5 cm | **498.0 cm**  | **122.9 cm**  | 89.1 cm | 527.7 cm | 2.0 cm |Velocity Const|
 
+<img width="2205" height="734" alt="exp1_3d_sensor_guess_a" src="https://github.com/user-attachments/assets/2e782e36-a048-4f1b-bd39-a0da565841dc" />
+
+<img width="2205" height="734" alt="exp2_3d_sensor_guess_b" src="https://github.com/user-attachments/assets/d897474e-f2d0-4027-a320-053c58f43c89" />
+
+<img width="2205" height="734" alt="exp3_camera_guess_a" src="https://github.com/user-attachments/assets/831a7292-6e0a-4525-a86b-2b14622599c3" />
+
+<img width="2204" height="734" alt="exp4_camera_guess_b" src="https://github.com/user-attachments/assets/607278e0-59b8-4b72-979b-48db55c6aa6f" />
+
 
 ## conlcusions 
 1. For the 3d sensor experiments. the constant position model consstently outperfromed the constant velocity model. The linear model, assumes a linear motion wich is not matching the circular trajectory, this introduces systematic prediction errors. The constat position model, allow the measurments to domcunate the estimation process. 
